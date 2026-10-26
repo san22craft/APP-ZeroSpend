@@ -2,8 +2,12 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Nothing Finance</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#000000" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>ZeroSpend</title>
   <style>
     * {
       box-sizing: border-box;
@@ -14,50 +18,51 @@
       user-select: none;
     }
 
+    :root {
+      --safe-bottom: env(safe-area-inset-bottom, 24px);
+      --safe-top: env(safe-area-inset-top, 16px);
+    }
+
     body {
-      background-color: #000;
-      background-image: radial-gradient(#262626 1px, transparent 1px);
-      background-size: 18px 18px;
-      color: #fff;
+      background-color: #000000;
+      color: #ffffff;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      min-height: 100dvh;
       overflow: hidden;
     }
 
     .phone-container {
       width: 100%;
-      max-width: 420px;
+      max-width: 440px;
       height: 100vh;
-      max-height: 840px;
-      background: #0d0d0d;
-      border: 1px solid #262626;
-      border-radius: 36px;
+      height: 100dvh;
+      background: #000000;
       display: flex;
       flex-direction: column;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
     }
 
-    /* PANTALLA PIN */
+    /* PANTALLA DE BLOQUEO POR PIN */
     #pinScreen {
       position: absolute;
       inset: 0;
-      background: #000;
+      background: #000000;
       z-index: 50;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       align-items: center;
-      padding: 35px 24px 25px 24px;
+      padding: calc(30px + var(--safe-top)) 24px calc(24px + var(--safe-bottom)) 24px;
     }
 
     .pin-top-tag {
       font-size: 11px;
       letter-spacing: 2px;
-      color: #737373;
+      color: #888888;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -73,79 +78,73 @@
     .pin-dots {
       display: flex;
       gap: 16px;
-      margin: 20px 0 10px 0;
+      margin: 24px 0 10px 0;
     }
 
     .pin-dot {
       width: 14px;
       height: 14px;
       border-radius: 50%;
-      border: 1.5px solid #525252;
+      border: 1.5px solid #555555;
       transition: all 0.15s ease;
     }
 
     .pin-dot.active {
-      background: #fff;
-      border-color: #fff;
-      box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+      background: #ffffff;
+      border-color: #ffffff;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
     }
 
-    /* TECLADO */
     .keypad-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 12px;
       width: 100%;
-      max-width: 290px;
+      max-width: 300px;
     }
 
     .keypad-btn {
-      height: 60px;
-      border-radius: 30px;
+      height: 62px;
+      border-radius: 32px;
       background: #141414;
-      border: 1px solid #262626;
-      color: #fff;
-      font-size: 20px;
+      border: 1px solid #282828;
+      color: #ffffff;
+      font-size: 22px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: transform 0.08s ease, background 0.1s;
-    }
-
-    .keypad-btn:hover {
-      border-color: #444;
     }
 
     .keypad-btn:active {
-      background: #333 !important;
-      transform: scale(0.95);
+      background: #333333 !important;
+      transform: scale(0.96);
     }
 
     .keypad-btn.action-btn {
       font-size: 11px;
       letter-spacing: 1px;
-      color: #888;
+      color: #999999;
       border: none;
       background: transparent;
     }
 
-    /* CABECERA */
+    /* BARRA SUPERIOR */
     .app-header {
-      padding: 18px 20px;
-      border-bottom: 1px solid #1f1f1f;
+      padding: calc(12px + var(--safe-top)) 20px 14px 20px;
+      border-bottom: 1px solid #1c1c1c;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
     .icon-btn {
-      width: 36px;
-      height: 36px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
-      border: 1px solid #262626;
-      background: #171717;
-      color: #aaa;
+      border: 1px solid #282828;
+      background: #141414;
+      color: #bbbbbb;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -153,73 +152,70 @@
     }
 
     .icon-btn:active {
-      background: #333;
-      color: #fff;
+      background: #2a2a2a;
+      color: #ffffff;
     }
 
-    /* CONTENIDO */
+    /* CONTENIDO PRINCIPAL */
     .main-content {
       flex: 1;
       overflow-y: auto;
-      padding: 16px;
+      padding: 16px 18px calc(40px + var(--safe-bottom)) 18px;
       display: flex;
       flex-direction: column;
       gap: 16px;
     }
 
     .balance-card {
-      background: #141414;
-      border: 1px solid #262626;
+      background: #121212;
+      border: 1px solid #282828;
       border-radius: 24px;
-      padding: 20px;
+      padding: 22px;
     }
 
     .balance-amount {
-      font-size: 34px;
+      font-size: 38px;
       font-weight: 700;
       letter-spacing: -0.5px;
       margin: 8px 0 16px 0;
+      color: #ffffff;
     }
 
     .dual-stats {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      padding-top: 12px;
-      border-top: 1px solid #222;
+      padding-top: 14px;
+      border-top: 1px solid #222222;
     }
 
     .action-big-btn {
       width: 100%;
-      padding: 16px;
-      background: #fff;
-      color: #000;
+      padding: 17px;
+      background: #ffffff;
+      color: #000000;
       border: none;
       border-radius: 20px;
       font-size: 13px;
       font-weight: 700;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
       cursor: pointer;
-      transition: transform 0.1s, background 0.1s;
-    }
-
-    .action-big-btn:hover {
-      background: #eee;
     }
 
     .action-big-btn:active {
       transform: scale(0.98);
+      background: #e2e2e2;
     }
 
     .tx-item {
-      background: #141414;
-      border: 1px solid #222;
+      background: #121212;
+      border: 1px solid #242424;
       border-radius: 16px;
-      padding: 12px 14px;
+      padding: 14px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -230,7 +226,8 @@
     .modal-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(6px);
       z-index: 40;
       display: flex;
       align-items: flex-end;
@@ -238,36 +235,36 @@
 
     .modal-content {
       width: 100%;
-      background: #111;
-      border-top: 1px solid #262626;
+      background: #111111;
+      border-top: 1px solid #2d2d2d;
       border-radius: 28px 28px 0 0;
-      padding: 20px;
-      max-height: 90%;
+      padding: 20px 20px calc(24px + var(--safe-bottom)) 20px;
+      max-height: 85%;
       overflow-y: auto;
     }
 
     .flow-step-1 {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin: 20px 0;
+      gap: 14px;
+      margin: 20px 0 14px 0;
     }
 
     .type-card {
-      height: 120px;
+      height: 125px;
       border-radius: 20px;
-      background: #171717;
-      border: 1px solid #2a2a2a;
-      padding: 14px;
+      background: #161616;
+      border: 1px solid #2c2c2c;
+      padding: 16px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       cursor: pointer;
-      transition: border-color 0.15s;
     }
 
-    .type-card:hover {
-      border-color: #555;
+    .type-card:active {
+      border-color: #ffffff;
+      background: #222222;
     }
 
     .categories-grid {
@@ -280,8 +277,8 @@
     }
 
     .cat-btn {
-      background: #171717;
-      border: 1px solid #262626;
+      background: #161616;
+      border: 1px solid #282828;
       border-radius: 16px;
       padding: 14px 6px;
       display: flex;
@@ -289,12 +286,12 @@
       align-items: center;
       gap: 8px;
       font-size: 11px;
-      color: #ddd;
+      color: #dddddd;
       cursor: pointer;
     }
 
-    .cat-btn:hover {
-      border-color: #fff;
+    .cat-btn:active {
+      border-color: #ffffff;
     }
 
     .hidden {
@@ -309,16 +306,16 @@
     <!-- PANTALLA DE PIN -->
     <div id="pinScreen">
       <div class="pin-top-tag">
-        <span class="red-dot"></span> NOTHING // SECURE
+        <span class="red-dot"></span> ZEROSPEND // SECURE
       </div>
 
       <div style="display:flex; flex-direction:column; align-items:center;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" style="margin-bottom:12px;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#aaaaaa" stroke-width="2" style="margin-bottom:12px;">
           <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
           <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
         </svg>
-        <h2 id="pinTitle" style="font-size:17px; font-weight:600;">Crea tu PIN de 4 dígitos</h2>
-        <p id="pinSub" style="font-size:11px; color:#666; margin-top:4px;">Usa el ratón o el teclado (0-9)</p>
+        <h2 id="pinTitle" style="font-size:18px; font-weight:600;">Crea tu PIN de 4 dígitos</h2>
+        <p id="pinSub" style="font-size:11px; color:#888888; margin-top:4px;">Acceso local privado</p>
         
         <div class="pin-dots">
           <div id="pdot-0" class="pin-dot"></div>
@@ -326,7 +323,7 @@
           <div id="pdot-2" class="pin-dot"></div>
           <div id="pdot-3" class="pin-dot"></div>
         </div>
-        <p id="pinError" style="font-size:11px; color:#d71920; height:16px;"></p>
+        <p id="pinError" style="font-size:12px; color:#d71920; height:16px;"></p>
       </div>
 
       <!-- Teclado PIN -->
@@ -349,12 +346,12 @@
     <!-- BARRA SUPERIOR -->
     <header class="app-header">
       <div>
-        <div style="font-size:9px; color:#666; letter-spacing:1px;">NOTHING OS // FINANCE</div>
-        <div style="font-size:15px; font-weight:700;">MI BILLETERA</div>
+        <div style="font-size:10px; color:#888888; letter-spacing:1.5px;">ZEROSPEND // OS</div>
+        <div style="font-size:16px; font-weight:700;">MI BILLETERA</div>
       </div>
       <div style="display:flex; gap:8px;">
         <button class="icon-btn" onclick="lockScreen()" title="Bloquear con PIN">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
           </svg>
@@ -366,16 +363,16 @@
     <main class="main-content">
       <!-- Balance -->
       <div class="balance-card">
-        <div style="font-size:11px; color:#777; text-transform:uppercase;">Saldo Disponible</div>
-        <div id="balanceText" class="balance-amount">0,00 €</div>
+        <div style="font-size:11px; color:#888888; text-transform:uppercase; letter-spacing:1px;">Saldo Disponible</div>
+        <div id="balanceText" class="balance-amount">0.00 €</div>
         <div class="dual-stats">
           <div>
-            <span style="font-size:10px; color:#22c55e;">● INGRESOS</span>
-            <div id="incText" style="font-size:13px; color:#22c55e; margin-top:2px;">+0,00 €</div>
+            <span style="font-size:11px; color:#22c55e;">● INGRESOS</span>
+            <div id="incText" style="font-size:14px; font-weight:600; color:#22c55e; margin-top:2px;">+0.00 €</div>
           </div>
           <div>
-            <span style="font-size:10px; color:#d71920;">● GASTOS</span>
-            <div id="expText" style="font-size:13px; color:#d71920; margin-top:2px;">-0,00 €</div>
+            <span style="font-size:11px; color:#d71920;">● GASTOS</span>
+            <div id="expText" style="font-size:14px; font-weight:600; color:#d71920; margin-top:2px;">-0.00 €</div>
           </div>
         </div>
       </div>
@@ -387,7 +384,7 @@
 
       <!-- Historial -->
       <div>
-        <div style="font-size:11px; color:#666; letter-spacing:1px; margin-bottom:8px; display:flex; justify-content:space-between;">
+        <div style="font-size:11px; color:#888888; letter-spacing:1px; margin-bottom:10px; display:flex; justify-content:space-between;">
           <span>HISTORIAL</span>
           <span id="historyCount">0 registros</span>
         </div>
@@ -398,63 +395,63 @@
     <!-- MODAL DE 3 PASOS -->
     <div id="flowModal" class="modal-overlay hidden">
       <div class="modal-content">
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #222; padding-bottom:12px;">
-          <span id="modalStepTag" style="font-size:11px; font-weight:700; background:#fff; color:#000; padding:2px 8px; border-radius:10px;">PASO 1 / 3</span>
-          <button onclick="closeFlow()" style="background:none; border:none; color:#777; font-size:18px; cursor:pointer;">✕</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #222222; padding-bottom:14px;">
+          <span id="modalStepTag" style="font-size:11px; font-weight:700; background:#ffffff; color:#000000; padding:3px 10px; border-radius:12px;">PASO 1 / 3</span>
+          <button onclick="closeFlow()" style="background:none; border:none; color:#888888; font-size:20px; cursor:pointer; padding:4px;">✕</button>
         </div>
 
         <!-- Paso 1 -->
         <div id="flowStep1" class="flow-step-1">
           <div class="type-card" onclick="setFlowType('expense')">
-            <span style="color:#d71920; font-size:24px;">↘</span>
+            <span style="color:#d71920; font-size:26px;">↘</span>
             <div>
-              <div style="font-size:10px; color:#777;">SALIDA</div>
-              <div style="font-size:16px; font-weight:700;">GASTO</div>
+              <div style="font-size:11px; color:#888888;">SALIDA</div>
+              <div style="font-size:17px; font-weight:700;">GASTO</div>
             </div>
           </div>
           <div class="type-card" onclick="setFlowType('income')">
-            <span style="color:#22c55e; font-size:24px;">↖</span>
+            <span style="color:#22c55e; font-size:26px;">↖</span>
             <div>
-              <div style="font-size:10px; color:#777;">ENTRADA</div>
-              <div style="font-size:16px; font-weight:700;">INGRESO</div>
+              <div style="font-size:11px; color:#888888;">ENTRADA</div>
+              <div style="font-size:17px; font-weight:700;">INGRESO</div>
             </div>
           </div>
         </div>
 
         <!-- Paso 2 -->
         <div id="flowStep2" class="hidden">
-          <p style="font-size:12px; color:#888; margin:14px 0 6px 0;">Elige la carpeta correspondiente:</p>
+          <p style="font-size:12px; color:#999999; margin:16px 0 8px 0;">Elige la carpeta correspondiente:</p>
           <div id="catGrid" class="categories-grid"></div>
-          <button onclick="setStep(1)" style="width:100%; padding:10px; background:#1c1c1c; border:1px solid #333; color:#aaa; border-radius:12px; font-size:11px; cursor:pointer;">← ATRÁS</button>
+          <button onclick="setStep(1)" style="width:100%; padding:12px; background:#181818; border:1px solid #333333; color:#aaaaaa; border-radius:12px; font-size:11px; cursor:pointer;">← ATRÁS</button>
         </div>
 
         <!-- Paso 3 -->
         <div id="flowStep3" class="hidden">
-          <div style="background:#171717; border:1px solid #262626; border-radius:16px; padding:12px; text-align:center; margin:12px 0;">
-            <div id="step3Label" style="font-size:10px; color:#777;">CARPETA</div>
-            <div id="step3Amount" style="font-size:28px; font-weight:700; margin:4px 0;">0,00 €</div>
-            <input type="text" id="txNoteInput" placeholder="Nota opcional (ej: Cena)" style="width:90%; background:transparent; border:none; border-bottom:1px solid #333; color:#ccc; text-align:center; font-size:12px; padding:4px;" />
+          <div style="background:#161616; border:1px solid #2a2a2a; border-radius:18px; padding:14px; text-align:center; margin:14px 0;">
+            <div id="step3Label" style="font-size:11px; color:#888888;">CARPETA</div>
+            <div id="step3Amount" style="font-size:32px; font-weight:700; margin:6px 0;">0.00 €</div>
+            <input type="text" id="txNoteInput" placeholder="Nota opcional (ej: Cena)" style="width:90%; background:transparent; border:none; border-bottom:1px solid #333333; color:#eeeeee; text-align:center; font-size:13px; padding:6px;" />
           </div>
 
           <!-- Teclado para importe -->
           <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;">
-            <button type="button" class="keypad-btn" style="height:46px; font-size:16px;" onclick="addPad('1')">1</button>
-            <button type="button" class="keypad-btn" style="height:46px; font-size:16px;" onclick="addPad('2')">2</button>
-            <button type="button" class="keypad-btn" style="height:46px; font-size:16px;" onclick="addPad('3')">3</button>
-            <button type="button" class="keypad-btn" style="height:46px; font-size:16px;" onclick="addPad('4')">4</button>
-            <button type="button" class="keypad-btn" style="height:46px; font-size:16px;" onclick="addPad('5')">5</button>
-            <button type="button" class="keypad-btn" style="height:46px; font-size:16px;" onclick="addPad('6')">6</button>
-            <button type="button" class="keypad-btn" style="height:46px; font-size:16px;" onclick="addPad('7')">7</button>
-            <button type="button" class="keypad-btn" style="height:46px; font-size:16px;" onclick="addPad('8')">8</button>
-            <button type="button" class="keypad-btn" style="height:46px; font-size:16px;" onclick="addPad('9')">9</button>
-            <button type="button" class="keypad-btn" style="height:46px; font-size:16px;" onclick="addPad('.')">.</button>
-            <button type="button" class="keypad-btn" style="height:46px; font-size:16px;" onclick="addPad('0')">0</button>
-            <button type="button" class="keypad-btn action-btn" style="height:46px;" onclick="delPad()">⌫</button>
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addPad('1')">1</button>
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addPad('2')">2</button>
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addPad('3')">3</button>
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addPad('4')">4</button>
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addPad('5')">5</button>
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addPad('6')">6</button>
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addPad('7')">7</button>
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addPad('8')">8</button>
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addPad('9')">9</button>
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addPad('.')">.</button>
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addPad('0')">0</button>
+            <button type="button" class="keypad-btn action-btn" style="height:48px;" onclick="delPad()">⌫</button>
           </div>
 
-          <div style="display:flex; gap:8px; margin-top:12px;">
-            <button onclick="setStep(2)" style="flex:1; padding:12px; background:#1c1c1c; border:1px solid #333; color:#aaa; border-radius:12px; font-size:11px; cursor:pointer;">ATRÁS</button>
-            <button onclick="saveTransaction()" style="flex:2; padding:12px; background:#fff; color:#000; font-weight:700; border:none; border-radius:12px; font-size:11px; cursor:pointer;">CONFIRMAR</button>
+          <div style="display:flex; gap:8px; margin-top:14px;">
+            <button onclick="setStep(2)" style="flex:1; padding:13px; background:#181818; border:1px solid #333333; color:#aaaaaa; border-radius:12px; font-size:11px; cursor:pointer;">ATRÁS</button>
+            <button onclick="saveTransaction()" style="flex:2; padding:13px; background:#ffffff; color:#000000; font-weight:700; border:none; border-radius:12px; font-size:11px; cursor:pointer;">CONFIRMAR</button>
           </div>
         </div>
 
@@ -464,26 +461,6 @@
   </div>
 
   <script>
-    // SISTEMA DE ALMACENAMIENTO SEGURO A PRUEBA DE BLOQUEOS
-    const memory = {};
-    const safeStore = {
-      get: function(key, fallback) {
-        try {
-          const val = localStorage.getItem(key);
-          return val !== null ? JSON.parse(val) : fallback;
-        } catch(e) {
-          return memory[key] !== undefined ? memory[key] : fallback;
-        }
-      },
-      set: function(key, val) {
-        try {
-          localStorage.setItem(key, JSON.stringify(val));
-        } catch(e) {
-          memory[key] = val;
-        }
-      }
-    };
-
     const DEFAULT_CATS = {
       expense: [
         { name: 'Comida', icon: '🍔' },
@@ -501,18 +478,15 @@
     };
 
     let appState = {
-      pin: safeStore.get('n_pin', null),
-      txs: safeStore.get('n_txs', [
-        { id: 1, type: 'income', category: 'Nómina', amount: 1450, note: 'Sueldo', date: '26 oct' },
-        { id: 2, type: 'expense', category: 'Comida', amount: 32.50, note: 'Compra súper', date: '26 oct' }
-      ])
+      pin: localStorage.getItem('n_pin') || null,
+      txs: JSON.parse(localStorage.getItem('n_txs') || '[]')
     };
 
     let currentPinInput = '';
     let isCreatingPin = !appState.pin;
     let flow = { type: 'expense', category: '', amount: '0' };
 
-    // PIN FUNCTIONS
+    // PIN
     window.pressPin = function(val) {
       if (currentPinInput.length < 4) {
         currentPinInput += String(val);
@@ -551,7 +525,7 @@
     function checkPin() {
       if (isCreatingPin) {
         appState.pin = currentPinInput;
-        safeStore.set('n_pin', appState.pin);
+        localStorage.setItem('n_pin', appState.pin);
         document.getElementById('pinScreen').classList.add('hidden');
       } else {
         if (currentPinInput === appState.pin) {
@@ -573,7 +547,7 @@
       document.getElementById('pinScreen').classList.remove('hidden');
     };
 
-    // FLUJO DE REGISTRO EN 3 PASOS
+    // FLUJO 3 PASOS
     window.openFlow = function() {
       flow = { type: 'expense', category: '', amount: '0' };
       document.getElementById('txNoteInput').value = '';
@@ -658,12 +632,11 @@
         date: new Date().toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })
       });
 
-      safeStore.set('n_txs', appState.txs);
+      localStorage.setItem('n_txs', JSON.stringify(appState.txs));
       closeFlow();
       refreshUI();
     };
 
-    // RENDER PRINCIPAL
     function refreshUI() {
       let total = 0, inc = 0, exp = 0;
 
@@ -686,7 +659,7 @@
       list.innerHTML = '';
 
       if (appState.txs.length === 0) {
-        list.innerHTML = `<div style="text-align:center; padding:24px; color:#555; font-size:12px; border:1px dashed #262626; border-radius:16px;">Sin movimientos todavía</div>`;
+        list.innerHTML = `<div style="text-align:center; padding:24px; color:#777777; font-size:12px; border:1px dashed #262626; border-radius:16px;">Sin movimientos todavía</div>`;
         return;
       }
 
@@ -696,14 +669,14 @@
         const isExp = t.type === 'expense';
         item.innerHTML = `
           <div>
-            <div style="font-size:13px; font-weight:600;">${t.category}</div>
-            <div style="font-size:10px; color:#666;">${t.note || t.date}</div>
+            <div style="font-size:14px; font-weight:600;">${t.category}</div>
+            <div style="font-size:11px; color:#888888;">${t.note || t.date}</div>
           </div>
-          <div style="display:flex; align-items:center; gap:10px;">
-            <span style="font-size:13px; font-weight:700; color:${isExp ? '#fff' : '#22c55e'};">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span style="font-size:14px; font-weight:700; color:${isExp ? '#ffffff' : '#22c55e'};">
               ${isExp ? '-' : '+'}${t.amount.toFixed(2)} €
             </span>
-            <button type="button" onclick="delTx(${t.id})" style="background:none; border:none; color:#666; cursor:pointer;">✕</button>
+            <button type="button" onclick="delTx(${t.id})" style="background:none; border:none; color:#888888; cursor:pointer; font-size:14px; padding:4px;">✕</button>
           </div>
         `;
         list.appendChild(item);
@@ -713,40 +686,12 @@
     window.delTx = function(id) {
       if (confirm("¿Borrar este movimiento?")) {
         appState.txs = appState.txs.filter(t => t.id !== id);
-        safeStore.set('n_txs', appState.txs);
+        localStorage.setItem('n_txs', JSON.stringify(appState.txs));
         refreshUI();
       }
     };
 
-    // SOPORTE PARA EL TECLADO FÍSICO DEL ORDENADOR
-    window.addEventListener('keydown', function(e) {
-      const pinVisible = !document.getElementById('pinScreen').classList.contains('hidden');
-      const flowVisible = !document.getElementById('flowModal').classList.contains('hidden');
-      const step3Visible = !document.getElementById('flowStep3').classList.contains('hidden');
-
-      if (pinVisible) {
-        if (e.key >= '0' && e.key <= '9') {
-          pressPin(e.key);
-        } else if (e.key === 'Backspace') {
-          delPin();
-        } else if (e.key === 'Escape') {
-          clearPin();
-        }
-      } else if (flowVisible && step3Visible) {
-        if (document.activeElement === document.getElementById('txNoteInput')) return;
-        if (e.key >= '0' && e.key <= '9') {
-          addPad(e.key);
-        } else if (e.key === '.' || e.key === ',') {
-          addPad('.');
-        } else if (e.key === 'Backspace') {
-          delPad();
-        } else if (e.key === 'Enter') {
-          saveTransaction();
-        }
-      }
-    });
-
-    // EJECUCIÓN INMEDIATA
+    // INICIAR
     (function init() {
       const title = document.getElementById('pinTitle');
       if (title) title.innerText = isCreatingPin ? "Crea tu PIN de 4 dígitos" : "Introduce tu PIN";
