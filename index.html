@@ -21,6 +21,9 @@
     :root {
       --safe-bottom: env(safe-area-inset-bottom, 24px);
       --safe-top: env(safe-area-inset-top, 16px);
+      --nothing-red: #d71920;
+      --spring-curve: cubic-bezier(0.16, 1, 0.3, 1);
+      --tap-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     body {
@@ -46,7 +49,7 @@
       overflow: hidden;
     }
 
-    /* PANTALLA DE BLOQUEO POR PIN */
+    /* PANTALLA PIN */
     #pinScreen {
       position: absolute;
       inset: 0;
@@ -57,6 +60,13 @@
       justify-content: space-between;
       align-items: center;
       padding: calc(30px + var(--safe-top)) 24px calc(24px + var(--safe-bottom)) 24px;
+      transition: opacity 0.3s ease, transform 0.35s var(--spring-curve);
+    }
+
+    #pinScreen.exit-anim {
+      opacity: 0;
+      transform: scale(1.08);
+      pointer-events: none;
     }
 
     .pin-top-tag {
@@ -72,7 +82,14 @@
       width: 8px;
       height: 8px;
       border-radius: 50%;
-      background: #d71920;
+      background: var(--nothing-red);
+      box-shadow: 0 0 8px rgba(215, 25, 32, 0.6);
+      animation: pulseGlyph 2s infinite ease-in-out;
+    }
+
+    @keyframes pulseGlyph {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
     }
 
     .pin-dots {
@@ -86,13 +103,24 @@
       height: 14px;
       border-radius: 50%;
       border: 1.5px solid #555555;
-      transition: all 0.15s ease;
+      transition: all 0.2s var(--tap-bounce);
     }
 
     .pin-dot.active {
       background: #ffffff;
       border-color: #ffffff;
-      box-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
+      box-shadow: 0 0 14px rgba(255, 255, 255, 0.95);
+      transform: scale(1.2);
+    }
+
+    .pin-dots.shake {
+      animation: shakeAnim 0.35s ease;
+    }
+
+    @keyframes shakeAnim {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
     }
 
     .keypad-grid {
@@ -114,11 +142,13 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      transition: transform 0.12s var(--spring-curve), background 0.15s ease;
     }
 
     .keypad-btn:active {
-      background: #333333 !important;
-      transform: scale(0.96);
+      background: #2a2a2a !important;
+      border-color: #555555;
+      transform: scale(0.90);
     }
 
     .keypad-btn.action-btn {
@@ -129,18 +159,68 @@
       background: transparent;
     }
 
-    /* BARRA SUPERIOR */
+    /* CABECERA & PESTAÑAS */
     .app-header {
-      padding: calc(12px + var(--safe-top)) 20px 14px 20px;
+      padding: calc(12px + var(--safe-top)) 20px 10px 20px;
       border-bottom: 1px solid #1c1c1c;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      background: #000000;
+      z-index: 20;
+    }
+
+    .header-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
 
+    .nav-tabs {
+      position: relative;
+      display: flex;
+      background: #121212;
+      border: 1px solid #222222;
+      border-radius: 24px;
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .nav-tab-btn {
+      flex: 1;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: #777777;
+      transition: color 0.25s ease, transform 0.15s ease;
+      z-index: 2;
+    }
+
+    .nav-tab-btn.active {
+      color: #000000;
+    }
+
+    .tab-slider-pill {
+      position: absolute;
+      top: 4px;
+      bottom: 4px;
+      left: 4px;
+      width: calc(50% - 6px);
+      background: #ffffff;
+      border-radius: 20px;
+      transition: transform 0.32s var(--spring-curve);
+      z-index: 1;
+      box-shadow: 0 2px 10px rgba(255, 255, 255, 0.15);
+    }
+
     .icon-btn {
-      width: 38px;
-      height: 38px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
       border: 1px solid #282828;
       background: #141414;
@@ -149,35 +229,78 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      transition: transform 0.15s ease;
     }
 
     .icon-btn:active {
+      transform: scale(0.90);
       background: #2a2a2a;
       color: #ffffff;
     }
 
-    /* CONTENIDO PRINCIPAL */
-    .main-content {
+    /* VIEWPORT */
+    .screens-viewport {
       flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .main-content {
+      position: absolute;
+      inset: 0;
       overflow-y: auto;
       padding: 16px 18px calc(40px + var(--safe-bottom)) 18px;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
+      transition: transform 0.35s var(--spring-curve), opacity 0.25s ease;
     }
 
-    .balance-card {
+    .view-left { transform: translateX(-100%); opacity: 0; pointer-events: none; }
+    .view-right { transform: translateX(100%); opacity: 0; pointer-events: none; }
+    .view-center { transform: translateX(0); opacity: 1; pointer-events: auto; }
+
+    /* PUERTA CORREDERA */
+    .door-slider-wrapper {
+      position: relative;
+      margin: 0 -18px;
+      padding: 0 18px;
+    }
+
+    .door-slider-track {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      gap: 12px;
+      padding: 4px 0 6px 0;
+    }
+
+    .door-slider-track::-webkit-scrollbar {
+      display: none;
+    }
+
+    .door-panel-card {
+      flex: 0 0 calc(100% - 28px);
+      scroll-snap-align: center;
       background: #121212;
       border: 1px solid #282828;
       border-radius: 24px;
-      padding: 22px;
+      padding: 18px 20px;
+      position: relative;
+      transition: transform 0.2s var(--spring-curve);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
     }
 
+    .door-panel-card.card-left { border-right: 2px solid #383838; }
+    .door-panel-card.card-right { border-left: 2px solid #383838; }
+
     .balance-amount {
-      font-size: 38px;
+      font-size: 34px;
       font-weight: 700;
       letter-spacing: -0.5px;
-      margin: 8px 0 16px 0;
+      margin: 4px 0 12px 0;
       color: #ffffff;
     }
 
@@ -185,13 +308,170 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 10px;
-      padding-top: 14px;
+      padding-top: 10px;
       border-top: 1px solid #222222;
+    }
+
+    .door-donut-layout {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .door-donut-center {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      pointer-events: none;
+    }
+
+    /* CARRUSEL INFERIOR */
+    .carousel-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .carousel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4px;
+    }
+
+    .carousel-dots {
+      display: flex;
+      gap: 5px;
+    }
+
+    .c-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #333333;
+      transition: all 0.3s var(--spring-curve);
+    }
+
+    .c-dot.active {
+      background: #ffffff;
+      width: 16px;
+      border-radius: 4px;
+      box-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+    }
+
+    .donut-carousel {
+      display: flex;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      gap: 12px;
+      scroll-behavior: smooth;
+    }
+
+    .donut-carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    .donut-card {
+      flex: 0 0 100%;
+      scroll-snap-align: start;
+      background: #121212;
+      border: 1px solid #262626;
+      border-radius: 24px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+    }
+
+    .donut-badge {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      color: #888888;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .donut-svg-wrapper {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .donut-center-info {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      max-width: 130px;
+      transition: transform 0.2s var(--tap-bounce);
+    }
+
+    .donut-center-sub {
+      font-size: 9px;
+      color: #888888;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      max-width: 120px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .donut-center-val {
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 2px 0;
+      letter-spacing: -0.5px;
+    }
+
+    .donut-center-pct {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 1px 6px;
+      border-radius: 8px;
+      background: #1c1c1c;
+      color: #aaaaaa;
+    }
+
+    .donut-slice {
+      cursor: pointer;
+      transition: transform 0.25s var(--tap-bounce), opacity 0.25s ease;
+      transform-origin: 110px 110px;
+    }
+
+    .donut-slice:hover,
+    .donut-slice.active {
+      transform: scale(1.06);
+      stroke: #ffffff;
+      stroke-width: 2px;
+      filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.4));
+    }
+
+    .donut-slice.dimmed {
+      fill: #202020 !important;
+      opacity: 0.35;
+      transform: scale(0.98);
     }
 
     .action-big-btn {
       width: 100%;
-      padding: 17px;
+      padding: 16px;
       background: #ffffff;
       color: #000000;
       border: none;
@@ -204,33 +484,94 @@
       justify-content: center;
       gap: 8px;
       cursor: pointer;
+      box-shadow: 0 4px 14px rgba(255, 255, 255, 0.12);
+      transition: transform 0.15s var(--tap-bounce), background 0.15s ease;
     }
 
     .action-big-btn:active {
-      transform: scale(0.98);
-      background: #e2e2e2;
+      transform: scale(0.94);
+      background: #d8d8d8;
     }
 
     .tx-item {
       background: #121212;
       border: 1px solid #242424;
       border-radius: 16px;
-      padding: 14px 16px;
+      padding: 13px 15px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 8px;
+      animation: slideInUp 0.3s var(--spring-curve) backwards;
     }
 
-    /* MODAL DE 3 PASOS */
+    .hucha-card {
+      background: #121212;
+      border: 1px solid #262626;
+      border-radius: 20px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 10px;
+      animation: slideInUp 0.32s var(--spring-curve) backwards;
+    }
+
+    @keyframes slideInUp {
+      0% { opacity: 0; transform: translateY(16px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .hucha-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .hucha-btn-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .hucha-action-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 12px;
+      border: 1px solid #333333;
+      background: #181818;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: transform 0.12s var(--spring-curve);
+    }
+
+    .hucha-action-btn:active {
+      transform: scale(0.94);
+      background: #2a2a2a;
+    }
+
+    /* MODALES FLOTANTES INFERIORES */
     .modal-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.88);
-      backdrop-filter: blur(6px);
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
       z-index: 40;
       display: flex;
       align-items: flex-end;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.28s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
     }
 
     .modal-content {
@@ -239,8 +580,58 @@
       border-top: 1px solid #2d2d2d;
       border-radius: 28px 28px 0 0;
       padding: 20px 20px calc(24px + var(--safe-bottom)) 20px;
-      max-height: 85%;
+      max-height: 88%;
       overflow-y: auto;
+      transform: translateY(100%);
+      transition: transform 0.35s var(--spring-curve);
+    }
+
+    .modal-overlay.open .modal-content {
+      transform: translateY(0);
+    }
+
+    /* ============================================================== */
+    /* NUEVO: VENTANA EMERGENTE EN EL CENTRO CON ZOOM (MODAL CENTRAL)  */
+    /* ============================================================== */
+    .center-zoom-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(10px);
+      z-index: 45;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.28s ease;
+    }
+
+    .center-zoom-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .center-zoom-box {
+      width: 100%;
+      max-width: 380px;
+      background: #111111;
+      border: 1px solid #2a2a2a;
+      border-radius: 28px;
+      padding: 22px 20px 24px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transform: scale(0.65);
+      opacity: 0;
+      transition: transform 0.35s var(--spring-curve), opacity 0.25s ease;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8);
+    }
+
+    .center-zoom-overlay.open .center-zoom-box {
+      transform: scale(1);
+      opacity: 1;
     }
 
     .flow-step-1 {
@@ -260,11 +651,13 @@
       flex-direction: column;
       justify-content: space-between;
       cursor: pointer;
+      transition: transform 0.15s var(--tap-bounce);
     }
 
     .type-card:active {
       border-color: #ffffff;
       background: #222222;
+      transform: scale(0.93);
     }
 
     .categories-grid {
@@ -288,10 +681,70 @@
       font-size: 11px;
       color: #dddddd;
       cursor: pointer;
+      transition: transform 0.12s var(--spring-curve);
     }
 
     .cat-btn:active {
+      transform: scale(0.92);
       border-color: #ffffff;
+    }
+
+    .nothing-input-field {
+      width: 100%;
+      background: #161616;
+      border: 1px solid #282828;
+      border-radius: 16px;
+      color: #ffffff;
+      padding: 16px;
+      font-size: 16px;
+      font-weight: 600;
+      outline: none;
+      text-align: center;
+      margin: 14px 0;
+    }
+
+    .icon-chips-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .icon-chip-btn {
+      height: 44px;
+      border-radius: 12px;
+      background: #161616;
+      border: 1px solid #282828;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .icon-chip-btn.selected {
+      border-color: #ffffff;
+      background: #262626;
+      transform: scale(1.08);
+    }
+
+    .quick-chips-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .quick-chip {
+      flex: 1;
+      padding: 8px 4px;
+      background: #161616;
+      border: 1px solid #282828;
+      border-radius: 10px;
+      color: #bbb;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
     }
 
     .hidden {
@@ -303,7 +756,7 @@
 
   <div class="phone-container">
 
-    <!-- PANTALLA DE PIN -->
+    <!-- PANTALLA PIN -->
     <div id="pinScreen">
       <div class="pin-top-tag">
         <span class="red-dot"></span> ZEROSPEND // SECURE
@@ -317,13 +770,13 @@
         <h2 id="pinTitle" style="font-size:18px; font-weight:600;">Crea tu PIN de 4 dígitos</h2>
         <p id="pinSub" style="font-size:11px; color:#888888; margin-top:4px;">Acceso local privado</p>
         
-        <div class="pin-dots">
+        <div id="pinDotsWrap" class="pin-dots">
           <div id="pdot-0" class="pin-dot"></div>
           <div id="pdot-1" class="pin-dot"></div>
           <div id="pdot-2" class="pin-dot"></div>
           <div id="pdot-3" class="pin-dot"></div>
         </div>
-        <p id="pinError" style="font-size:12px; color:#d71920; height:16px;"></p>
+        <p id="pinError" style="font-size:12px; color:var(--nothing-red); height:16px; font-weight:500;"></p>
       </div>
 
       <!-- Teclado PIN -->
@@ -343,89 +796,256 @@
       </div>
     </div>
 
-    <!-- BARRA SUPERIOR -->
+    <!-- CABECERA SUPERIOR -->
     <header class="app-header">
-      <div>
-        <div style="font-size:10px; color:#888888; letter-spacing:1.5px;">ZEROSPEND // OS</div>
-        <div style="font-size:16px; font-weight:700;">MI BILLETERA</div>
-      </div>
-      <div style="display:flex; gap:8px;">
+      <div class="header-row">
+        <div>
+          <div style="font-size:9px; color:#888888; letter-spacing:1.5px;">ZEROSPEND // OS</div>
+          <div id="currentTabHeaderTitle" style="font-size:16px; font-weight:700;">MI BILLETERA</div>
+        </div>
         <button class="icon-btn" onclick="lockScreen()" title="Bloquear con PIN">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
           </svg>
         </button>
       </div>
+
+      <div class="nav-tabs">
+        <div id="tabSliderPill" class="tab-slider-pill"></div>
+        <button id="tabBtnInicio" class="nav-tab-btn active" onclick="switchTab('inicio')">INICIO</button>
+        <button id="tabBtnHuchas" class="nav-tab-btn" onclick="switchTab('huchas')">HUCHAS</button>
+      </div>
     </header>
 
-    <!-- CONTENIDO -->
-    <main class="main-content">
-      <!-- Balance -->
-      <div class="balance-card">
-        <div style="font-size:11px; color:#888888; text-transform:uppercase; letter-spacing:1px;">Saldo Disponible</div>
-        <div id="balanceText" class="balance-amount">0.00 €</div>
-        <div class="dual-stats">
-          <div>
-            <span style="font-size:11px; color:#22c55e;">● INGRESOS</span>
-            <div id="incText" style="font-size:14px; font-weight:600; color:#22c55e; margin-top:2px;">+0.00 €</div>
-          </div>
-          <div>
-            <span style="font-size:11px; color:#d71920;">● GASTOS</span>
-            <div id="expText" style="font-size:14px; font-weight:600; color:#d71920; margin-top:2px;">-0.00 €</div>
+    <!-- VIEWPORT CON TRANSICIÓN -->
+    <div class="screens-viewport">
+
+      <!-- ==================== PANTALLA 1: INICIO ==================== -->
+      <main id="viewInicio" class="main-content view-center">
+        
+        <!-- PUERTA CORREDERA -->
+        <div class="door-slider-wrapper">
+          <div id="doorTrack" class="door-slider-track">
+            
+            <!-- HOJA 1: SALDO TOTAL NETO -->
+            <div class="door-panel-card card-left" onclick="handleCardClick(0)">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-size:10px; color:#888888; text-transform:uppercase; letter-spacing:1px;">Saldo Total Neto</div>
+                <div style="font-size:9px; color:#aaaaaa; background:#1c1c1c; padding:2px 8px; border-radius:10px;">
+                  HUCHAS ➔
+                </div>
+              </div>
+              <div id="balanceText" class="balance-amount">0.00 €</div>
+              <div class="dual-stats">
+                <div>
+                  <span style="font-size:10px; color:#22c55e;">● INGRESOS</span>
+                  <div id="incText" style="font-size:13px; font-weight:600; color:#22c55e; margin-top:2px;">+0.00 €</div>
+                </div>
+                <div>
+                  <span style="font-size:10px; color:var(--nothing-red);">● GASTOS</span>
+                  <div id="expText" style="font-size:13px; font-weight:600; color:var(--nothing-red); margin-top:2px;">-0.00 €</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- HOJA 2: DONUT HUCHAS (TOCAR ABRE EL ZOOM CENTRAL) -->
+            <div class="door-panel-card card-right" onclick="handleCardClick(1)">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-size:9px; color:#aaaaaa; background:#1c1c1c; padding:2px 8px; border-radius:10px;">
+                  ⬅ SALDO
+                </div>
+                <div style="font-size:10px; color:#eab308; text-transform:uppercase; letter-spacing:1px; font-weight:700;">
+                  GUARDADO EN HUCHAS
+                </div>
+              </div>
+
+              <div class="door-donut-layout">
+                <!-- Mini Donut que abre el Zoom al pulsar -->
+                <div id="doorDonutTouchBox" style="position:relative; width:110px; height:110px; display:flex; align-items:center; justify-content:center; cursor:pointer;" onclick="openCentralZoomModal(event)">
+                  <svg id="doorHuchasDonutSvg" viewBox="0 0 160 160" width="110" height="110"></svg>
+                  <div class="door-donut-center">
+                    <span style="font-size:8px; color:#888; text-transform:uppercase;">TOCA ZOOM</span>
+                    <span id="doorDonutCenterVal" style="font-size:13px; font-weight:700; color:#fff;">0€</span>
+                  </div>
+                </div>
+
+                <!-- Detalle textual al lado -->
+                <div style="flex:1; display:flex; flex-direction:column; gap:8px;">
+                  <div style="background:#181818; padding:8px 10px; border-radius:12px; border-left:3px solid #22c55e;">
+                    <div style="font-size:9px; color:#888888;">SALDO LIBRE</div>
+                    <div id="doorFreeVal" style="font-size:15px; font-weight:700; color:#22c55e;">0.00 €</div>
+                  </div>
+                  <div style="background:#181818; padding:8px 10px; border-radius:12px; border-left:3px solid #facc15;">
+                    <div style="font-size:9px; color:#888888;">EN HUCHAS</div>
+                    <div id="doorHuchasVal" style="font-size:15px; font-weight:700; color:#facc15;">0.00 €</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
-      </div>
 
-      <!-- Botón Registrar -->
-      <button class="action-big-btn" onclick="openFlow()">
-        <span style="font-size:18px;">+</span> REGISTRAR MOVIMIENTO
-      </button>
+        <!-- CARRUSEL DONUTS INFERIOR -->
+        <div class="carousel-section">
+          <div class="carousel-header">
+            <span style="font-size:10px; font-weight:700; letter-spacing:1px; color:#777777;">GRÁFICOS (DESLIZA)</span>
+            <div class="carousel-dots">
+              <div id="cdot-0" class="c-dot active"></div>
+              <div id="cdot-1" class="c-dot"></div>
+              <div id="cdot-2" class="c-dot"></div>
+            </div>
+          </div>
 
-      <!-- Historial -->
-      <div>
-        <div style="font-size:11px; color:#888888; letter-spacing:1px; margin-bottom:10px; display:flex; justify-content:space-between;">
-          <span>HISTORIAL</span>
-          <span id="historyCount">0 registros</span>
+          <div id="donutCarousel" class="donut-carousel" onscroll="handleCarouselScroll()">
+            <!-- 1. Ingresos -->
+            <div class="donut-card">
+              <div class="donut-badge">1/3 · FUENTES DE INGRESO</div>
+              <div class="donut-svg-wrapper">
+                <svg id="incomeDonutSvg" viewBox="0 0 220 220" width="220" height="220"></svg>
+                <div class="donut-center-info" onclick="resetDonutFocus('income')">
+                  <span id="incCenterSub" class="donut-center-sub">TOTAL INGRESOS</span>
+                  <span id="incCenterVal" class="donut-center-val">0.00 €</span>
+                  <span id="incCenterPct" class="donut-center-pct hidden">100%</span>
+                </div>
+              </div>
+              <span style="font-size:9px; color:#666666; margin-top:4px;">Toca una franja para ver detalles</span>
+            </div>
+
+            <!-- 2. Gastos en Rojo -->
+            <div class="donut-card">
+              <div class="donut-badge" style="color:var(--nothing-red);">2/3 · DESGLOSE DE GASTOS</div>
+              <div class="donut-svg-wrapper">
+                <svg id="expenseDonutSvg" viewBox="0 0 220 220" width="220" height="220"></svg>
+                <div class="donut-center-info" onclick="resetDonutFocus('expense')">
+                  <span id="expCenterSub" class="donut-center-sub" style="color:var(--nothing-red);">TOTAL GASTOS</span>
+                  <span id="expCenterVal" class="donut-center-val" style="color:var(--nothing-red);">0.00 €</span>
+                  <span id="expCenterPct" class="donut-center-pct hidden">100%</span>
+                </div>
+              </div>
+              <span style="font-size:9px; color:#666666; margin-top:4px;">Toca una franja para ver detalles</span>
+            </div>
+
+            <!-- 3. Global -->
+            <div class="donut-card">
+              <div class="donut-badge">3/3 · BALANCE GLOBAL</div>
+              <div class="donut-svg-wrapper">
+                <svg id="globalDonutSvg" viewBox="0 0 220 220" width="220" height="220"></svg>
+                <div class="donut-center-info" onclick="resetDonutFocus('global')">
+                  <span id="gloCenterSub" class="donut-center-sub">ESTADO NETO</span>
+                  <span id="gloCenterVal" class="donut-center-val">0.00 €</span>
+                  <span id="gloCenterPct" class="donut-center-pct hidden">100%</span>
+                </div>
+              </div>
+              <span style="font-size:9px; color:#666666; margin-top:4px;">Comparación directa Ingresos vs Gastos</span>
+            </div>
+          </div>
         </div>
-        <div id="txListContainer"></div>
-      </div>
-    </main>
 
-    <!-- MODAL DE 3 PASOS -->
-    <div id="flowModal" class="modal-overlay hidden">
+        <!-- Botón Registrar Movimiento -->
+        <button class="action-big-btn" onclick="openFlow()">
+          <span style="font-size:18px;">+</span> REGISTRAR MOVIMIENTO
+        </button>
+
+        <!-- Historial -->
+        <div>
+          <div style="font-size:11px; color:#888888; letter-spacing:1px; margin-bottom:10px; display:flex; justify-content:space-between;">
+            <span>HISTORIAL</span>
+            <span id="historyCount">0 registros</span>
+          </div>
+          <div id="txListContainer"></div>
+        </div>
+      </main>
+
+      <!-- ==================== PANTALLA 2: HUCHAS ==================== -->
+      <main id="viewHuchas" class="main-content view-right">
+        <div class="balance-card">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:10px; color:#888888; text-transform:uppercase; letter-spacing:1px;">Guardado en Huchas</div>
+              <div id="totalInHuchasVal" class="balance-amount" style="font-size:28px; margin:4px 0;">0.00 €</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:10px; color:#888888; text-transform:uppercase; letter-spacing:1px;">Dinero Libre</div>
+              <div id="freeMoneyVal" style="font-size:18px; font-weight:700; color:#22c55e; margin-top:4px;">0.00 €</div>
+            </div>
+          </div>
+        </div>
+
+        <button class="action-big-btn" onclick="openCreateHuchaModal()">
+          <span style="font-size:18px;">+</span> NUEVA HUCHA
+        </button>
+
+        <div>
+          <div style="font-size:11px; color:#888888; letter-spacing:1px; margin-bottom:10px; display:flex; justify-content:space-between;">
+            <span>MIS HUCHAS</span>
+            <span id="huchasCountTag">0 activas</span>
+          </div>
+          <div id="huchasListContainer"></div>
+        </div>
+      </main>
+
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- NUEVA VENTANA DE ZOOM EN EL CENTRO DE LA PANTALLA              -->
+    <!-- ============================================================== -->
+    <div id="centerZoomModal" class="center-zoom-overlay">
+      <div class="center-zoom-box">
+        <div style="width:100%; display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <span style="font-size:10px; font-weight:700; letter-spacing:1.5px; color:#facc15;">DETALLE DE HUCHAS // ZOOM</span>
+          <button onclick="closeCentralZoomModal()" style="background:none; border:none; color:#888888; font-size:18px; cursor:pointer; padding:4px;">✕</button>
+        </div>
+
+        <!-- Donut Grande con Zoom -->
+        <div style="position:relative; width:220px; height:220px; display:flex; align-items:center; justify-content:center;">
+          <svg id="zoomDonutSvg" viewBox="0 0 220 220" width="220" height="220"></svg>
+          <div id="zoomCenterTouch" class="donut-center-info" onclick="resetZoomCenter()">
+            <span id="zoomCenterSub" class="donut-center-sub">TOTAL HUCHAS</span>
+            <span id="zoomCenterVal" class="donut-center-val">0.00 €</span>
+            <span id="zoomCenterPct" class="donut-center-pct hidden">100%</span>
+          </div>
+        </div>
+
+        <p style="font-size:10px; color:#777777; margin:12px 0 6px 0; text-align:center;">Toca cualquier franja para ver nombre y porcentaje</p>
+
+        <!-- Leyenda con lista compacta -->
+        <div id="zoomBreakdownList" style="width:100%; max-height:120px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; margin-top:8px;"></div>
+      </div>
+    </div>
+
+    <!-- MODAL REGISTRO (3 PASOS) -->
+    <div id="flowModal" class="modal-overlay">
       <div class="modal-content">
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #222222; padding-bottom:14px;">
           <span id="modalStepTag" style="font-size:11px; font-weight:700; background:#ffffff; color:#000000; padding:3px 10px; border-radius:12px;">PASO 1 / 3</span>
           <button onclick="closeFlow()" style="background:none; border:none; color:#888888; font-size:20px; cursor:pointer; padding:4px;">✕</button>
         </div>
 
-        <!-- Paso 1 -->
         <div id="flowStep1" class="flow-step-1">
           <div class="type-card" onclick="setFlowType('expense')">
-            <span style="color:#d71920; font-size:26px;">↘</span>
+            <span style="color:var(--nothing-red); font-size:26px;">↘</span>
             <div>
               <div style="font-size:11px; color:#888888;">SALIDA</div>
-              <div style="font-size:17px; font-weight:700;">GASTO</div>
+              <div style="font-size:17px; font-weight:700; color:var(--nothing-red);">GASTO</div>
             </div>
           </div>
           <div class="type-card" onclick="setFlowType('income')">
             <span style="color:#22c55e; font-size:26px;">↖</span>
             <div>
               <div style="font-size:11px; color:#888888;">ENTRADA</div>
-              <div style="font-size:17px; font-weight:700;">INGRESO</div>
+              <div style="font-size:17px; font-weight:700; color:#22c55e;">INGRESO</div>
             </div>
           </div>
         </div>
 
-        <!-- Paso 2 -->
         <div id="flowStep2" class="hidden">
           <p style="font-size:12px; color:#999999; margin:16px 0 8px 0;">Elige la carpeta correspondiente:</p>
           <div id="catGrid" class="categories-grid"></div>
           <button onclick="setStep(1)" style="width:100%; padding:12px; background:#181818; border:1px solid #333333; color:#aaaaaa; border-radius:12px; font-size:11px; cursor:pointer;">← ATRÁS</button>
         </div>
 
-        <!-- Paso 3 -->
         <div id="flowStep3" class="hidden">
           <div style="background:#161616; border:1px solid #2a2a2a; border-radius:18px; padding:14px; text-align:center; margin:14px 0;">
             <div id="step3Label" style="font-size:11px; color:#888888;">CARPETA</div>
@@ -433,7 +1053,6 @@
             <input type="text" id="txNoteInput" placeholder="Nota opcional (ej: Cena)" style="width:90%; background:transparent; border:none; border-bottom:1px solid #333333; color:#eeeeee; text-align:center; font-size:13px; padding:6px;" />
           </div>
 
-          <!-- Teclado para importe -->
           <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;">
             <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addPad('1')">1</button>
             <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addPad('2')">2</button>
@@ -454,13 +1073,97 @@
             <button onclick="saveTransaction()" style="flex:2; padding:13px; background:#ffffff; color:#000000; font-weight:700; border:none; border-radius:12px; font-size:11px; cursor:pointer;">CONFIRMAR</button>
           </div>
         </div>
+      </div>
+    </div>
 
+    <!-- MODAL CREAR HUCHA -->
+    <div id="createHuchaModal" class="modal-overlay">
+      <div class="modal-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #222222; padding-bottom:14px;">
+          <span style="font-size:11px; font-weight:700; background:#ffffff; color:#000000; padding:3px 10px; border-radius:12px;">NUEVA META</span>
+          <button onclick="closeCreateHuchaModal()" style="background:none; border:none; color:#888888; font-size:20px; cursor:pointer; padding:4px;">✕</button>
+        </div>
+
+        <div style="padding-top:14px;">
+          <p style="font-size:11px; color:#888888; letter-spacing:1px; text-transform:uppercase;">Elige un icono:</p>
+          <div class="icon-chips-grid" id="huchaIconChips">
+            <button class="icon-chip-btn selected" onclick="selectHuchaIcon('🎯', this)">🎯</button>
+            <button class="icon-chip-btn" onclick="selectHuchaIcon('✈️', this)">✈️</button>
+            <button class="icon-chip-btn" onclick="selectHuchaIcon('🚗', this)">🚗</button>
+            <button class="icon-chip-btn" onclick="selectHuchaIcon('🏠', this)">🏠</button>
+            <button class="icon-chip-btn" onclick="selectHuchaIcon('💻', this)">💻</button>
+            <button class="icon-chip-btn" onclick="selectHuchaIcon('🛡️', this)">🛡️</button>
+          </div>
+
+          <p style="font-size:11px; color:#888888; letter-spacing:1px; text-transform:uppercase;">Nombre de tu Hucha:</p>
+          <input type="text" id="huchaNameInput" placeholder="Ej: Viaje a Japón, Moto nueva..." class="nothing-input-field" maxlength="24" />
+
+          <p id="huchaCreateError" style="font-size:11px; color:var(--nothing-red); height:16px; margin-bottom:8px; text-align:center;"></p>
+
+          <div style="display:flex; gap:8px;">
+            <button onclick="closeCreateHuchaModal()" style="flex:1; padding:14px; background:#181818; border:1px solid #333333; color:#aaaaaa; border-radius:14px; font-size:12px; font-weight:600; cursor:pointer;">CANCELAR</button>
+            <button onclick="confirmCreateHucha()" style="flex:2; padding:14px; background:#ffffff; color:#000000; font-weight:700; border:none; border-radius:14px; font-size:12px; letter-spacing:1px; cursor:pointer;">CREAR HUCHA</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL GESTIÓN DE DINERO EN HUCHA -->
+    <div id="huchaMoneyModal" class="modal-overlay">
+      <div class="modal-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #222222; padding-bottom:14px;">
+          <span id="huchaMoneyTag" style="font-size:11px; font-weight:700; background:#ffffff; color:#000000; padding:3px 10px; border-radius:12px;">HUCHA</span>
+          <button onclick="closeHuchaMoneyModal()" style="background:none; border:none; color:#888888; font-size:20px; cursor:pointer; padding:4px;">✕</button>
+        </div>
+
+        <div style="padding-top:14px;">
+          <div style="background:#161616; border:1px solid #2a2a2a; border-radius:18px; padding:14px; text-align:center; margin-bottom:12px;">
+            <div id="huchaMoneySubtitle" style="font-size:11px; color:#888888;">DESTINAR A: VIAJE</div>
+            <div id="huchaMoneyDisplay" style="font-size:32px; font-weight:700; margin:6px 0;">0.00 €</div>
+            <div id="huchaLimitInfo" style="font-size:10px; color:#666666; font-family:monospace;">DISPONIBLE LIBRE: 0.00 €</div>
+          </div>
+
+          <div class="quick-chips-row">
+            <button class="quick-chip" onclick="quickHuchaAdd(10)">+10€</button>
+            <button class="quick-chip" onclick="quickHuchaAdd(20)">+20€</button>
+            <button class="quick-chip" onclick="quickHuchaAdd(50)">+50€</button>
+            <button class="quick-chip" style="color:#ffffff; border-color:#555555;" onclick="quickHuchaMax()">TODO</button>
+          </div>
+
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;">
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addHuchaPad('1')">1</button>
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addHuchaPad('2')">2</button>
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addHuchaPad('3')">3</button>
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addHuchaPad('4')">4</button>
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addHuchaPad('5')">5</button>
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addHuchaPad('6')">6</button>
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addHuchaPad('7')">7</button>
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addHuchaPad('8')">8</button>
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addHuchaPad('9')">9</button>
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addHuchaPad('.')">.</button>
+            <button type="button" class="keypad-btn" style="height:48px; font-size:18px;" onclick="addHuchaPad('0')">0</button>
+            <button type="button" class="keypad-btn action-btn" style="height:48px;" onclick="delHuchaPad()">⌫</button>
+          </div>
+
+          <p id="huchaMoneyError" style="font-size:11px; color:var(--nothing-red); height:16px; margin:6px 0; text-align:center;"></p>
+
+          <div style="display:flex; gap:8px; margin-top:6px;">
+            <button onclick="closeHuchaMoneyModal()" style="flex:1; padding:13px; background:#181818; border:1px solid #333333; color:#aaaaaa; border-radius:12px; font-size:11px; cursor:pointer;">CANCELAR</button>
+            <button id="huchaMoneyConfirmBtn" onclick="commitHuchaMoney()" style="flex:2; padding:13px; background:#ffffff; color:#000000; font-weight:700; border:none; border-radius:12px; font-size:11px; cursor:pointer;">CONFIRMAR</button>
+          </div>
+        </div>
       </div>
     </div>
 
   </div>
 
   <script>
+    function haptic(ms = 10) {
+      if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(ms);
+      }
+    }
+
     const DEFAULT_CATS = {
       expense: [
         { name: 'Comida', icon: '🍔' },
@@ -477,32 +1180,108 @@
       ]
     };
 
+    const EXPENSE_COLORS = ['#d71920', '#ff3b30', '#b31317', '#ff6b6b', '#800c0f', '#ff8585'];
+    const INCOME_COLORS = ['#ffffff', '#22c55e', '#a3e635', '#4ade80', '#e5e5e5', '#86efac'];
+    
+    // GAMA DE AMARILLOS NOTHING OS
+    const YELLOW_SHADES = [
+      '#fde047', '#facc15', '#eab308', '#ca8a04', '#a16207', 
+      '#fef08a', '#e2b322', '#d4af37', '#b48508', '#78350f'
+    ];
+
     let appState = {
       pin: localStorage.getItem('n_pin') || null,
-      txs: JSON.parse(localStorage.getItem('n_txs') || '[]')
+      txs: JSON.parse(localStorage.getItem('n_txs') || '[]'),
+      huchas: JSON.parse(localStorage.getItem('n_huchas') || '[]')
     };
 
     let currentPinInput = '';
     let isCreatingPin = !appState.pin;
+    let resetAttempts = 0;
     let flow = { type: 'expense', category: '', amount: '0' };
+    let currentTab = 'inicio';
 
-    // PIN
+    let selectedHuchaIcon = '🎯';
+    let huchaMoneyFlow = {
+      huchaId: null,
+      mode: 'add',
+      amountStr: '0',
+      maxLimit: 0
+    };
+
+    let selectedSlices = {
+      income: null,
+      expense: null,
+      global: null
+    };
+
+    let activeZoomSliceIndex = null;
+
+    // --- PUERTA CORREDERA ---
+    window.handleCardClick = function(targetIndex) {
+      const track = document.getElementById('doorTrack');
+      const cardWidth = track.offsetWidth * 0.85;
+      haptic(10);
+      track.scrollTo({
+        left: targetIndex * cardWidth,
+        behavior: 'smooth'
+      });
+    };
+
+    // --- NAVEGACIÓN ENTRE PESTAÑAS ---
+    window.switchTab = function(tabName) {
+      haptic(12);
+      if (currentTab === tabName) return;
+      currentTab = tabName;
+
+      const vInicio = document.getElementById('viewInicio');
+      const vHuchas = document.getElementById('viewHuchas');
+      const slider = document.getElementById('tabSliderPill');
+      const btnInicio = document.getElementById('tabBtnInicio');
+      const btnHuchas = document.getElementById('tabBtnHuchas');
+      const headerTitle = document.getElementById('currentTabHeaderTitle');
+
+      if (tabName === 'inicio') {
+        slider.style.transform = 'translateX(0)';
+        btnInicio.classList.add('active');
+        btnHuchas.classList.remove('active');
+        headerTitle.innerText = 'MI BILLETERA';
+
+        vInicio.className = 'main-content view-center';
+        vHuchas.className = 'main-content view-right';
+      } else {
+        slider.style.transform = 'translateX(100%)';
+        btnInicio.classList.remove('active');
+        btnHuchas.classList.add('active');
+        headerTitle.innerText = 'MIS HUCHAS';
+
+        vInicio.className = 'main-content view-left';
+        vHuchas.className = 'main-content view-center';
+      }
+
+      refreshUI();
+    };
+
+    // --- PIN SYSTEM ---
     window.pressPin = function(val) {
+      haptic(8);
       if (currentPinInput.length < 4) {
         currentPinInput += String(val);
         drawPinDots();
         if (currentPinInput.length === 4) {
-          setTimeout(checkPin, 100);
+          setTimeout(checkPin, 120);
         }
       }
     };
 
     window.delPin = function() {
+      haptic(10);
       currentPinInput = currentPinInput.slice(0, -1);
       drawPinDots();
     };
 
     window.clearPin = function() {
+      haptic(15);
       currentPinInput = '';
       drawPinDots();
     };
@@ -519,19 +1298,51 @@
         }
       }
       const err = document.getElementById('pinError');
-      if (err) err.innerText = '';
+      if (err && currentPinInput.length === 0) err.innerText = '';
     }
 
     function checkPin() {
+      const pinDotsWrap = document.getElementById('pinDotsWrap');
+      const pinScreen = document.getElementById('pinScreen');
+
       if (isCreatingPin) {
+        haptic(20);
         appState.pin = currentPinInput;
         localStorage.setItem('n_pin', appState.pin);
-        document.getElementById('pinScreen').classList.add('hidden');
+        resetAttempts = 0;
+        pinScreen.classList.add('exit-anim');
+        setTimeout(() => pinScreen.classList.add('hidden'), 350);
       } else {
         if (currentPinInput === appState.pin) {
-          document.getElementById('pinScreen').classList.add('hidden');
+          haptic(20);
+          resetAttempts = 0;
+          pinScreen.classList.add('exit-anim');
+          setTimeout(() => pinScreen.classList.add('hidden'), 350);
         } else {
-          document.getElementById('pinError').innerText = "PIN incorrecto";
+          haptic([40, 50, 40]);
+          pinDotsWrap.classList.add('shake');
+          setTimeout(() => pinDotsWrap.classList.remove('shake'), 400);
+
+          if (currentPinInput === '9999') {
+            resetAttempts++;
+            if (resetAttempts >= 3) {
+              localStorage.removeItem('n_pin');
+              appState.pin = null;
+              isCreatingPin = true;
+              resetAttempts = 0;
+              currentPinInput = '';
+              drawPinDots();
+              document.getElementById('pinTitle').innerText = "Crea tu nuevo PIN";
+              document.getElementById('pinSub').innerText = "PIN anterior restablecido";
+              document.getElementById('pinError').innerText = "PIN eliminado";
+              return;
+            } else {
+              document.getElementById('pinError').innerText = `Reset maestro (${resetAttempts}/3)`;
+            }
+          } else {
+            resetAttempts = 0;
+            document.getElementById('pinError').innerText = "PIN incorrecto";
+          }
           currentPinInput = '';
           drawPinDots();
         }
@@ -539,27 +1350,617 @@
     }
 
     window.lockScreen = function() {
+      haptic(15);
       currentPinInput = '';
       drawPinDots();
       isCreatingPin = !appState.pin;
       const title = document.getElementById('pinTitle');
+      const sub = document.getElementById('pinSub');
+      const pinScreen = document.getElementById('pinScreen');
       if (title) title.innerText = isCreatingPin ? "Crea tu PIN de 4 dígitos" : "Introduce tu PIN";
-      document.getElementById('pinScreen').classList.remove('hidden');
+      if (sub) sub.innerText = "Acceso local privado";
+      pinScreen.classList.remove('hidden', 'exit-anim');
     };
 
-    // FLUJO 3 PASOS
+    window.handleCarouselScroll = function() {
+      const carousel = document.getElementById('donutCarousel');
+      const scrollPos = carousel.scrollLeft;
+      const width = carousel.offsetWidth;
+      const index = Math.round(scrollPos / width);
+
+      for (let i = 0; i < 3; i++) {
+        const dot = document.getElementById('cdot-' + i);
+        if (dot) dot.classList.toggle('active', i === index);
+      }
+    };
+
+    // --- MATEMÁTICAS SVG PARA ARCOS ---
+    function describeArc(cx, cy, rOut, rIn, startAngle, endAngle) {
+      const startRad = (startAngle - 90) * Math.PI / 180.0;
+      const endRad = (endAngle - 90) * Math.PI / 180.0;
+
+      const x1 = cx + rOut * Math.cos(startRad);
+      const y1 = cy + rOut * Math.sin(startRad);
+      const x2 = cx + rOut * Math.cos(endRad);
+      const y2 = cy + rOut * Math.sin(endRad);
+
+      const x3 = cx + rIn * Math.cos(endRad);
+      const y3 = cy + rIn * Math.sin(endRad);
+      const x4 = cx + rIn * Math.cos(startRad);
+      const y4 = cy + rIn * Math.sin(startRad);
+
+      const largeArc = (endAngle - startAngle) <= 180 ? 0 : 1;
+
+      return [
+        "M", x1, y1,
+        "A", rOut, rOut, 0, largeArc, 1, x2, y2,
+        "L", x3, y3,
+        "A", rIn, rIn, 0, largeArc, 0, x4, y4,
+        "Z"
+      ].join(" ");
+    }
+
+    // DONUT COMPACTO DE LA PUERTA CORREDERA
+    function renderDoorHuchasDonut(freeMoney, huchasArray) {
+      const svg = document.getElementById('doorHuchasDonutSvg');
+      if (!svg) return;
+      svg.innerHTML = '';
+
+      const cx = 80, cy = 80, rOut = 74, rIn = 48;
+      const totalHuchas = huchasArray.reduce((acc, h) => acc + (h.balance || 0), 0);
+      const totalCombined = Math.max(0, freeMoney) + totalHuchas;
+
+      if (totalCombined <= 0) {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", cx);
+        circle.setAttribute("cy", cy);
+        circle.setAttribute("r", (rOut + rIn) / 2);
+        circle.setAttribute("fill", "none");
+        circle.setAttribute("stroke", "#222222");
+        circle.setAttribute("stroke-width", rOut - rIn);
+        circle.setAttribute("stroke-dasharray", "3 3");
+        svg.appendChild(circle);
+        document.getElementById('doorDonutCenterVal').innerText = "0 €";
+        return;
+      }
+
+      document.getElementById('doorDonutCenterVal').innerText = `${Math.round(totalCombined)} €`;
+
+      const slices = [];
+      if (freeMoney > 0) slices.push({ name: 'Saldo Libre', amount: freeMoney, color: '#22c55e' });
+      huchasArray.forEach((h, idx) => {
+        if (h.balance > 0) {
+          slices.push({ name: h.name, amount: h.balance, color: YELLOW_SHADES[idx % YELLOW_SHADES.length] });
+        }
+      });
+
+      let currentAngle = 0;
+      slices.forEach((s) => {
+        const sliceAngle = (s.amount / totalCombined) * 360;
+        const start = currentAngle;
+        const end = currentAngle + sliceAngle;
+        currentAngle = end;
+
+        const pad = slices.length > 1 ? 1.5 : 0;
+        const arcD = describeArc(cx, cy, rOut, rIn, start + pad, end - pad);
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", arcD);
+        path.setAttribute("fill", s.color);
+        svg.appendChild(path);
+      });
+    }
+
+    // ==============================================================
+    // LÓGICA DE LA NUEVA VENTANA DE ZOOM EN EL CENTRO
+    // ==============================================================
+    window.openCentralZoomModal = function(e) {
+      if (e) e.stopPropagation();
+      haptic(16);
+      activeZoomSliceIndex = null;
+      renderZoomDonut();
+      document.getElementById('centerZoomModal').classList.add('open');
+    };
+
+    window.closeCentralZoomModal = function() {
+      haptic(10);
+      document.getElementById('centerZoomModal').classList.remove('open');
+    };
+
+    window.resetZoomCenter = function() {
+      haptic(10);
+      activeZoomSliceIndex = null;
+      renderZoomDonut();
+    };
+
+    function renderZoomDonut() {
+      const svg = document.getElementById('zoomDonutSvg');
+      if (!svg) return;
+      svg.innerHTML = '';
+
+      let inc = 0, exp = 0;
+      appState.txs.forEach(t => {
+        if (t.type === 'income') inc += t.amount;
+        else exp += t.amount;
+      });
+      const totalNeto = inc - exp;
+      const totalHuchas = appState.huchas.reduce((acc, h) => acc + (h.balance || 0), 0);
+      const freeMoney = totalNeto - totalHuchas;
+      const totalCombined = Math.max(0, freeMoney) + totalHuchas;
+
+      const sub = document.getElementById('zoomCenterSub');
+      const val = document.getElementById('zoomCenterVal');
+      const pct = document.getElementById('zoomCenterPct');
+
+      // Preparar datos de franjas
+      const slices = [];
+      if (freeMoney > 0) {
+        slices.push({ name: 'Saldo Libre', amount: freeMoney, color: '#22c55e', icon: '🟢' });
+      }
+      appState.huchas.forEach((h, idx) => {
+        if (h.balance > 0) {
+          slices.push({
+            name: h.name,
+            amount: h.balance,
+            color: YELLOW_SHADES[idx % YELLOW_SHADES.length],
+            icon: h.icon || '🎯'
+          });
+        }
+      });
+
+      // Detalle del centro
+      if (activeZoomSliceIndex !== null && slices[activeZoomSliceIndex]) {
+        const sel = slices[activeZoomSliceIndex];
+        const percent = ((sel.amount / totalCombined) * 100).toFixed(1);
+        sub.innerText = sel.name.toUpperCase();
+        sub.style.color = sel.color;
+        val.innerText = `${sel.amount.toFixed(2)} €`;
+        pct.innerText = `${percent}%`;
+        pct.classList.remove('hidden');
+      } else {
+        sub.innerText = "TOTAL HUCHAS";
+        sub.style.color = "#888888";
+        val.innerText = `${totalHuchas.toFixed(2)} €`;
+        pct.classList.add('hidden');
+      }
+
+      const cx = 110, cy = 110, rOut = 95, rIn = 66;
+
+      if (slices.length === 0 || totalCombined <= 0) {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", cx);
+        circle.setAttribute("cy", cy);
+        circle.setAttribute("r", (rOut + rIn) / 2);
+        circle.setAttribute("fill", "none");
+        circle.setAttribute("stroke", "#222222");
+        circle.setAttribute("stroke-width", rOut - rIn);
+        circle.setAttribute("stroke-dasharray", "4 4");
+        svg.appendChild(circle);
+        return;
+      }
+
+      let currentAngle = 0;
+      slices.forEach((s, idx) => {
+        const sliceAngle = (s.amount / totalCombined) * 360;
+        const start = currentAngle;
+        const end = currentAngle + sliceAngle;
+        currentAngle = end;
+
+        const pad = slices.length > 1 ? 1.5 : 0;
+        const arcD = describeArc(cx, cy, rOut, rIn, start + pad, end - pad);
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", arcD);
+        path.classList.add("donut-slice");
+
+        const isSelected = (activeZoomSliceIndex === idx);
+        const isDimmed = (activeZoomSliceIndex !== null && !isSelected);
+
+        path.setAttribute("fill", s.color);
+        if (isDimmed) path.classList.add("dimmed");
+        if (isSelected) path.classList.add("active");
+
+        path.onclick = (ev) => {
+          ev.stopPropagation();
+          haptic(15);
+          activeZoomSliceIndex = (activeZoomSliceIndex === idx) ? null : idx;
+          renderZoomDonut();
+        };
+
+        svg.appendChild(path);
+      });
+
+      // Render de la lista inferior de desglose
+      const listContainer = document.getElementById('zoomBreakdownList');
+      listContainer.innerHTML = '';
+      slices.forEach((s, idx) => {
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.justifyContent = 'space-between';
+        row.style.alignItems = 'center';
+        row.style.padding = '6px 10px';
+        row.style.borderRadius = '10px';
+        row.style.background = activeZoomSliceIndex === idx ? '#222222' : '#161616';
+        row.style.cursor = 'pointer';
+        row.onclick = () => {
+          haptic(12);
+          activeZoomSliceIndex = (activeZoomSliceIndex === idx) ? null : idx;
+          renderZoomDonut();
+        };
+
+        const pctNum = ((s.amount / totalCombined) * 100).toFixed(0);
+        row.innerHTML = `
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="width:8px; height:8px; border-radius:50%; background:${s.color};"></span>
+            <span style="font-size:12px; font-weight:600;">${s.name}</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:12px; font-weight:700;">${s.amount.toFixed(2)} €</span>
+            <span style="font-size:10px; color:#888;">${pctNum}%</span>
+          </div>
+        `;
+        listContainer.appendChild(row);
+      });
+    }
+
+    // DONUTS CARRUSEL INFERIOR
+    function renderDonutChart(svgId, data, palette, donutType, totalAmount) {
+      const svg = document.getElementById(svgId);
+      if (!svg) return;
+      svg.innerHTML = '';
+      const cx = 110, cy = 110, rOut = 95, rIn = 66;
+
+      if (!data || data.length === 0 || totalAmount <= 0) {
+        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+        circle.setAttribute("cx", cx);
+        circle.setAttribute("cy", cy);
+        circle.setAttribute("r", (rOut + rIn) / 2);
+        circle.setAttribute("fill", "none");
+        circle.setAttribute("stroke", "#1f1f1f");
+        circle.setAttribute("stroke-width", rOut - rIn);
+        circle.setAttribute("stroke-dasharray", "4 4");
+        svg.appendChild(circle);
+        return;
+      }
+
+      let currentAngle = 0;
+      const activeIdx = selectedSlices[donutType];
+
+      data.forEach((item, index) => {
+        const sliceAngle = (item.amount / totalAmount) * 360;
+        const start = currentAngle;
+        const end = currentAngle + sliceAngle;
+        currentAngle = end;
+
+        const pad = data.length > 1 ? 1.5 : 0;
+        const arcD = describeArc(cx, cy, rOut, rIn, start + pad, end - pad);
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", arcD);
+        path.classList.add("donut-slice");
+
+        const isDimmed = activeIdx !== null && activeIdx !== index;
+        const isSelected = activeIdx === index;
+
+        path.setAttribute("fill", item.color || palette[index % palette.length]);
+        if (isDimmed) path.classList.add("dimmed");
+        if (isSelected) path.classList.add("active");
+
+        path.onclick = (e) => {
+          e.stopPropagation();
+          haptic(15);
+          toggleSlice(donutType, index, item, totalAmount);
+        };
+
+        svg.appendChild(path);
+      });
+    }
+
+    function toggleSlice(donutType, index, item, totalAmount) {
+      if (selectedSlices[donutType] === index) {
+        selectedSlices[donutType] = null;
+      } else {
+        selectedSlices[donutType] = index;
+      }
+      refreshDonuts();
+
+      const sub = document.getElementById(`${donutType.slice(0,3)}CenterSub`);
+      const val = document.getElementById(`${donutType.slice(0,3)}CenterVal`);
+      const pct = document.getElementById(`${donutType.slice(0,3)}CenterPct`);
+
+      if (selectedSlices[donutType] !== null) {
+        const percent = ((item.amount / totalAmount) * 100).toFixed(1);
+        sub.innerText = item.name.toUpperCase();
+        val.innerText = `${item.amount.toFixed(2)} €`;
+        pct.innerText = `${percent}%`;
+        pct.classList.remove('hidden');
+      } else {
+        resetDonutFocus(donutType);
+      }
+    }
+
+    window.resetDonutFocus = function(donutType) {
+      haptic(10);
+      selectedSlices[donutType] = null;
+      refreshDonuts();
+
+      const sub = document.getElementById(`${donutType.slice(0,3)}CenterSub`);
+      const val = document.getElementById(`${donutType.slice(0,3)}CenterVal`);
+      const pct = document.getElementById(`${donutType.slice(0,3)}CenterPct`);
+
+      if (pct) pct.classList.add('hidden');
+
+      let total = 0, inc = 0, exp = 0;
+      appState.txs.forEach(t => {
+        if (t.type === 'income') { total += t.amount; inc += t.amount; }
+        else { total -= t.amount; exp += t.amount; }
+      });
+
+      if (donutType === 'income') {
+        sub.innerText = "TOTAL INGRESOS";
+        val.innerText = `${inc.toFixed(2)} €`;
+      } else if (donutType === 'expense') {
+        sub.innerText = "TOTAL GASTOS";
+        val.innerText = `${exp.toFixed(2)} €`;
+      } else if (donutType === 'global') {
+        sub.innerText = "ESTADO NETO";
+        val.innerText = `${total.toFixed(2)} €`;
+      }
+    };
+
+    function refreshDonuts() {
+      let incTotal = 0, expTotal = 0;
+      const incMap = {}, expMap = {};
+
+      appState.txs.forEach(t => {
+        if (t.type === 'income') {
+          incTotal += t.amount;
+          incMap[t.category] = (incMap[t.category] || 0) + t.amount;
+        } else {
+          expTotal += t.amount;
+          expMap[t.category] = (expMap[t.category] || 0) + t.amount;
+        }
+      });
+
+      const totalNeto = incTotal - expTotal;
+      const totalHuchas = appState.huchas.reduce((acc, h) => acc + (h.balance || 0), 0);
+      const freeMoney = totalNeto - totalHuchas;
+
+      // 1. Donut de la puerta corredera
+      renderDoorHuchasDonut(freeMoney, appState.huchas);
+
+      // 2. Donuts inferiores
+      const incData = Object.keys(incMap).map(k => ({ name: k, amount: incMap[k] }));
+      const expData = Object.keys(expMap).map(k => ({ name: k, amount: expMap[k] }));
+
+      renderDonutChart('incomeDonutSvg', incData, INCOME_COLORS, 'income', incTotal);
+      if (selectedSlices['income'] === null) {
+        document.getElementById('incCenterVal').innerText = `${incTotal.toFixed(2)} €`;
+      }
+
+      renderDonutChart('expenseDonutSvg', expData, EXPENSE_COLORS, 'expense', expTotal);
+      if (selectedSlices['expense'] === null) {
+        document.getElementById('expCenterVal').innerText = `${expTotal.toFixed(2)} €`;
+      }
+
+      const gloTotal = incTotal + expTotal;
+      const gloData = [];
+      if (incTotal > 0) gloData.push({ name: 'Ingresos', amount: incTotal, color: '#ffffff' });
+      if (expTotal > 0) gloData.push({ name: 'Gastos', amount: expTotal, color: '#d71920' });
+
+      renderDonutChart('globalDonutSvg', gloData, ['#ffffff', '#d71920'], 'global', gloTotal);
+      if (selectedSlices['global'] === null) {
+        document.getElementById('gloCenterVal').innerText = `${totalNeto.toFixed(2)} €`;
+      }
+    }
+
+    function openModalWithAnim(modalId) {
+      haptic(14);
+      document.getElementById(modalId).classList.add('open');
+    }
+
+    function closeModalWithAnim(modalId) {
+      haptic(10);
+      document.getElementById(modalId).classList.remove('open');
+    }
+
+    // CREAR HUCHA
+    window.openCreateHuchaModal = function() {
+      selectedHuchaIcon = '🎯';
+      const input = document.getElementById('huchaNameInput');
+      input.value = '';
+      document.getElementById('huchaCreateError').innerText = '';
+      
+      const chips = document.querySelectorAll('#huchaIconChips button');
+      chips.forEach((c, idx) => c.classList.toggle('selected', idx === 0));
+
+      openModalWithAnim('createHuchaModal');
+      setTimeout(() => input.focus(), 250);
+    };
+
+    window.closeCreateHuchaModal = function() {
+      closeModalWithAnim('createHuchaModal');
+    };
+
+    window.selectHuchaIcon = function(icon, btn) {
+      haptic(8);
+      selectedHuchaIcon = icon;
+      document.querySelectorAll('#huchaIconChips button').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    };
+
+    window.confirmCreateHucha = function() {
+      const name = document.getElementById('huchaNameInput').value.trim();
+      const err = document.getElementById('huchaCreateError');
+
+      if (!name) {
+        haptic([30, 40]);
+        err.innerText = "Escribe un nombre para la hucha";
+        return;
+      }
+
+      haptic(20);
+      appState.huchas.push({
+        id: Date.now(),
+        name: name,
+        icon: selectedHuchaIcon,
+        balance: 0
+      });
+
+      localStorage.setItem('n_huchas', JSON.stringify(appState.huchas));
+      closeCreateHuchaModal();
+      refreshUI();
+    };
+
+    // DINERO EN HUCHA
+    window.openHuchaMoneyPanel = function(id, mode) {
+      const hucha = appState.huchas.find(h => h.id === id);
+      if (!hucha) return;
+
+      let inc = 0, exp = 0;
+      appState.txs.forEach(t => {
+        if (t.type === 'income') inc += t.amount;
+        else exp += t.amount;
+      });
+      const totalNeto = inc - exp;
+      const totalHuchas = appState.huchas.reduce((acc, h) => acc + (h.balance || 0), 0);
+      const freeMoney = Math.max(0, totalNeto - totalHuchas);
+
+      huchaMoneyFlow = {
+        huchaId: id,
+        mode: mode,
+        amountStr: '0',
+        maxLimit: mode === 'add' ? freeMoney : (hucha.balance || 0)
+      };
+
+      const tag = document.getElementById('huchaMoneyTag');
+      const sub = document.getElementById('huchaMoneySubtitle');
+      const info = document.getElementById('huchaLimitInfo');
+      const btn = document.getElementById('huchaMoneyConfirmBtn');
+      document.getElementById('huchaMoneyError').innerText = '';
+
+      if (mode === 'add') {
+        tag.innerText = "AÑADIR A HUCHA";
+        tag.style.background = "#ffffff";
+        tag.style.color = "#000000";
+        sub.innerText = `DESTINAR A: ${hucha.name.toUpperCase()}`;
+        info.innerText = `DINERO LIBRE DISPONIBLE: ${freeMoney.toFixed(2)} €`;
+        btn.innerText = "GUARDAR EN HUCHA";
+      } else {
+        tag.innerText = "RETIRAR DE HUCHA";
+        tag.style.background = "var(--nothing-red)";
+        tag.style.color = "#ffffff";
+        sub.innerText = `LIBERAR DESDE: ${hucha.name.toUpperCase()}`;
+        info.innerText = `GUARDADO EN ESTA HUCHA: ${(hucha.balance || 0).toFixed(2)} €`;
+        btn.innerText = "RETIRAR A LIBRE";
+      }
+
+      updateHuchaMoneyDisplay();
+      openModalWithAnim('huchaMoneyModal');
+    };
+
+    window.closeHuchaMoneyModal = function() {
+      closeModalWithAnim('huchaMoneyModal');
+    };
+
+    window.addHuchaPad = function(char) {
+      haptic(8);
+      document.getElementById('huchaMoneyError').innerText = '';
+      if (huchaMoneyFlow.amountStr === '0' && char !== '.') {
+        huchaMoneyFlow.amountStr = char;
+      } else {
+        if (char === '.' && huchaMoneyFlow.amountStr.includes('.')) return;
+        const parts = huchaMoneyFlow.amountStr.split('.');
+        if (parts[1] && parts[1].length >= 2) return;
+        huchaMoneyFlow.amountStr += char;
+      }
+      updateHuchaMoneyDisplay();
+    };
+
+    window.delHuchaPad = function() {
+      haptic(10);
+      document.getElementById('huchaMoneyError').innerText = '';
+      huchaMoneyFlow.amountStr = huchaMoneyFlow.amountStr.length <= 1 ? '0' : huchaMoneyFlow.amountStr.slice(0, -1);
+      updateHuchaMoneyDisplay();
+    };
+
+    window.quickHuchaAdd = function(val) {
+      haptic(12);
+      document.getElementById('huchaMoneyError').innerText = '';
+      let cur = parseFloat(huchaMoneyFlow.amountStr) || 0;
+      cur += val;
+      if (cur > huchaMoneyFlow.maxLimit) cur = huchaMoneyFlow.maxLimit;
+      huchaMoneyFlow.amountStr = cur.toFixed(2).replace(/\.00$/, '');
+      updateHuchaMoneyDisplay();
+    };
+
+    window.quickHuchaMax = function() {
+      haptic(15);
+      document.getElementById('huchaMoneyError').innerText = '';
+      huchaMoneyFlow.amountStr = huchaMoneyFlow.maxLimit.toFixed(2).replace(/\.00$/, '');
+      updateHuchaMoneyDisplay();
+    };
+
+    function updateHuchaMoneyDisplay() {
+      const num = parseFloat(huchaMoneyFlow.amountStr) || 0;
+      document.getElementById('huchaMoneyDisplay').innerText = num.toFixed(2) + ' €';
+    }
+
+    window.commitHuchaMoney = function() {
+      const val = parseFloat(huchaMoneyFlow.amountStr);
+      const err = document.getElementById('huchaMoneyError');
+      const hucha = appState.huchas.find(h => h.id === huchaMoneyFlow.huchaId);
+
+      if (!hucha || isNaN(val) || val <= 0) {
+        haptic([30, 40]);
+        err.innerText = "Introduce una cantidad válida";
+        return;
+      }
+
+      if (val > huchaMoneyFlow.maxLimit) {
+        haptic([30, 40]);
+        err.innerText = huchaMoneyFlow.mode === 'add' ? "No tienes suficiente dinero libre" : "Supera lo guardado en esta hucha";
+        return;
+      }
+
+      haptic(20);
+      if (huchaMoneyFlow.mode === 'add') {
+        hucha.balance = (hucha.balance || 0) + val;
+      } else {
+        hucha.balance = Math.max(0, (hucha.balance || 0) - val);
+      }
+
+      localStorage.setItem('n_huchas', JSON.stringify(appState.huchas));
+      closeHuchaMoneyModal();
+      refreshUI();
+    };
+
+    window.deleteHucha = function(id) {
+      const hucha = appState.huchas.find(h => h.id === id);
+      if (!hucha) return;
+
+      if (confirm(`¿Eliminar la hucha "${hucha.name}"? Los ${(hucha.balance || 0).toFixed(2)} € guardados volverán a tu saldo libre.`)) {
+        haptic(20);
+        appState.huchas = appState.huchas.filter(h => h.id !== id);
+        localStorage.setItem('n_huchas', JSON.stringify(appState.huchas));
+        refreshUI();
+      }
+    };
+
+    // FLUJO REGISTRO
     window.openFlow = function() {
       flow = { type: 'expense', category: '', amount: '0' };
       document.getElementById('txNoteInput').value = '';
       setStep(1);
-      document.getElementById('flowModal').classList.remove('hidden');
+      openModalWithAnim('flowModal');
     };
 
     window.closeFlow = function() {
-      document.getElementById('flowModal').classList.add('hidden');
+      closeModalWithAnim('flowModal');
     };
 
     window.setStep = function(stepNum) {
+      haptic(10);
       document.getElementById('modalStepTag').innerText = `PASO ${stepNum} / 3`;
       document.getElementById('flowStep1').classList.toggle('hidden', stepNum !== 1);
       document.getElementById('flowStep2').classList.toggle('hidden', stepNum !== 2);
@@ -581,10 +1982,11 @@
       const container = document.getElementById('catGrid');
       container.innerHTML = '';
       const cats = DEFAULT_CATS[flow.type];
-      cats.forEach(c => {
+      cats.forEach((c, idx) => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = 'cat-btn';
+        btn.style.animation = `slideInUp ${0.15 + idx * 0.04}s var(--spring-curve) backwards`;
         btn.innerHTML = `<span style="font-size:22px;">${c.icon}</span><span>${c.name}</span>`;
         btn.onclick = function() {
           flow.category = c.name;
@@ -595,6 +1997,7 @@
     }
 
     window.addPad = function(char) {
+      haptic(8);
       if (flow.amount === '0' && char !== '.') {
         flow.amount = char;
       } else {
@@ -607,6 +2010,7 @@
     };
 
     window.delPad = function() {
+      haptic(10);
       flow.amount = flow.amount.length <= 1 ? '0' : flow.amount.slice(0, -1);
       updateAmountLabel();
     };
@@ -619,10 +2023,12 @@
     window.saveTransaction = function() {
       const val = parseFloat(flow.amount);
       if (!val || val <= 0) {
+        haptic([30, 40]);
         alert("Escribe una cantidad válida.");
         return;
       }
 
+      haptic(22);
       appState.txs.unshift({
         id: Date.now(),
         type: flow.type,
@@ -637,6 +2043,7 @@
       refreshUI();
     };
 
+    // REFRESH GENERAL
     function refreshUI() {
       let total = 0, inc = 0, exp = 0;
 
@@ -650,41 +2057,99 @@
         }
       });
 
+      const totalHuchas = appState.huchas.reduce((acc, h) => acc + (h.balance || 0), 0);
+      const freeMoney = total - totalHuchas;
+
+      // 1. Datos Inicio
       document.getElementById('balanceText').innerText = total.toFixed(2) + ' €';
       document.getElementById('incText').innerText = '+' + inc.toFixed(2) + ' €';
       document.getElementById('expText').innerText = '-' + exp.toFixed(2) + ' €';
       document.getElementById('historyCount').innerText = `${appState.txs.length} registros`;
 
+      // 2. Datos Puerta corredera
+      const doorFree = document.getElementById('doorFreeVal');
+      doorFree.innerText = freeMoney.toFixed(2) + ' €';
+      doorFree.style.color = freeMoney >= 0 ? '#22c55e' : 'var(--nothing-red)';
+      document.getElementById('doorHuchasVal').innerText = totalHuchas.toFixed(2) + ' €';
+
+      // 3. Datos pestaña Huchas
+      document.getElementById('totalInHuchasVal').innerText = totalHuchas.toFixed(2) + ' €';
+      const freeMoneyEl = document.getElementById('freeMoneyVal');
+      freeMoneyEl.innerText = freeMoney.toFixed(2) + ' €';
+      freeMoneyEl.style.color = freeMoney >= 0 ? '#22c55e' : 'var(--nothing-red)';
+      document.getElementById('huchasCountTag').innerText = `${appState.huchas.length} activas`;
+
+      refreshDonuts();
+
+      // Render Historial
       const list = document.getElementById('txListContainer');
       list.innerHTML = '';
-
       if (appState.txs.length === 0) {
         list.innerHTML = `<div style="text-align:center; padding:24px; color:#777777; font-size:12px; border:1px dashed #262626; border-radius:16px;">Sin movimientos todavía</div>`;
-        return;
+      } else {
+        appState.txs.forEach((t, i) => {
+          const item = document.createElement('div');
+          item.className = 'tx-item';
+          item.style.animationDelay = `${Math.min(i * 0.04, 0.4)}s`;
+          const isExp = t.type === 'expense';
+          item.innerHTML = `
+            <div>
+              <div style="font-size:14px; font-weight:600;">${t.category}</div>
+              <div style="font-size:11px; color:#888888;">${t.note || t.date}</div>
+            </div>
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span style="font-size:14px; font-weight:700; color:${isExp ? 'var(--nothing-red)' : '#22c55e'};">
+                ${isExp ? '-' : '+'}${t.amount.toFixed(2)} €
+              </span>
+              <button type="button" onclick="delTx(${t.id})" style="background:none; border:none; color:#888888; cursor:pointer; font-size:14px; padding:4px;">✕</button>
+            </div>
+          `;
+          list.appendChild(item);
+        });
       }
 
-      appState.txs.forEach(t => {
-        const item = document.createElement('div');
-        item.className = 'tx-item';
-        const isExp = t.type === 'expense';
-        item.innerHTML = `
-          <div>
-            <div style="font-size:14px; font-weight:600;">${t.category}</div>
-            <div style="font-size:11px; color:#888888;">${t.note || t.date}</div>
-          </div>
-          <div style="display:flex; align-items:center; gap:12px;">
-            <span style="font-size:14px; font-weight:700; color:${isExp ? '#ffffff' : '#22c55e'};">
-              ${isExp ? '-' : '+'}${t.amount.toFixed(2)} €
-            </span>
-            <button type="button" onclick="delTx(${t.id})" style="background:none; border:none; color:#888888; cursor:pointer; font-size:14px; padding:4px;">✕</button>
-          </div>
-        `;
-        list.appendChild(item);
-      });
+      // Render Huchas
+      const huchasList = document.getElementById('huchasListContainer');
+      huchasList.innerHTML = '';
+      if (appState.huchas.length === 0) {
+        huchasList.innerHTML = `<div style="text-align:center; padding:24px; color:#777777; font-size:12px; border:1px dashed #262626; border-radius:16px;">No tienes huchas creadas. Pulsa "+ NUEVA HUCHA" para empezar.</div>`;
+      } else {
+        appState.huchas.forEach((h, index) => {
+          const card = document.createElement('div');
+          card.className = 'hucha-card';
+          card.style.animationDelay = `${Math.min(index * 0.05, 0.4)}s`;
+          const yellowColor = YELLOW_SHADES[index % YELLOW_SHADES.length];
+          card.innerHTML = `
+            <div class="hucha-header">
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span style="font-size:18px;">${h.icon || '🎯'}</span>
+                <div>
+                  <div style="font-size:14px; font-weight:700;">${h.name}</div>
+                  <div style="font-size:10px; color:${yellowColor}; font-weight:600;">META ACTIVA</div>
+                </div>
+              </div>
+              <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:17px; font-weight:700; font-family:monospace;">${(h.balance || 0).toFixed(2)} €</span>
+                <button onclick="deleteHucha(${h.id})" style="background:none; border:none; color:#666666; cursor:pointer; font-size:14px; padding:4px;">✕</button>
+              </div>
+            </div>
+            <div class="hucha-btn-group">
+              <button class="hucha-action-btn" onclick="openHuchaMoneyPanel(${h.id}, 'add')">
+                <span style="color:#22c55e;">+</span> AÑADIR
+              </button>
+              <button class="hucha-action-btn" onclick="openHuchaMoneyPanel(${h.id}, 'withdraw')">
+                <span style="color:var(--nothing-red);">-</span> RETIRAR
+              </button>
+            </div>
+          `;
+          huchasList.appendChild(card);
+        });
+      }
     }
 
     window.delTx = function(id) {
       if (confirm("¿Borrar este movimiento?")) {
+        haptic(15);
         appState.txs = appState.txs.filter(t => t.id !== id);
         localStorage.setItem('n_txs', JSON.stringify(appState.txs));
         refreshUI();
